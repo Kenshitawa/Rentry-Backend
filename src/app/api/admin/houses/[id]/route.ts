@@ -1,0 +1,4 @@
+import {NextRequest,NextResponse} from "next/server";
+import {isAdminRequest} from "@/lib/admin-auth";
+import {getHouse,saveHouseListing} from "@/lib/database";
+export async function PATCH(request:NextRequest,{params}:{params:Promise<{id:string}>}){if(!isAdminRequest(request))return NextResponse.json({error:"Admin access required."},{status:401});try{const{id}=await params,old=await getHouse(id,true);if(!old)return NextResponse.json({error:"Listing not found."},{status:404});const b=await request.json(),updated={...old,...b,id};if(typeof updated.title!=="string"||typeof updated.imageUrl!=="string"||!/^https:\/\//.test(updated.imageUrl)||typeof updated.planImageUrl!=="string"||!/^https?:\/\//.test(updated.planImageUrl))return NextResponse.json({error:"Check the title and image URLs."},{status:400});return NextResponse.json({house:await saveHouseListing(updated)});}catch{return NextResponse.json({error:"Could not update listing."},{status:400});}}
