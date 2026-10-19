@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/admin-auth";
-import { getDashboard } from "@/lib/database";
+import { getDashboard, isLocalDatabase } from "@/lib/database";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +11,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(await getDashboard());
   } catch (error) {
     console.error("Admin dashboard unavailable", error);
-    return NextResponse.json({ error: "The store database could not be opened. Check the database file path and permissions, then refresh." }, { status: 503 });
+    return NextResponse.json({ error: isLocalDatabase() ? "The local store file could not be read. Check write access to the project folder and refresh." : "Could not reach Supabase. Check the backend URL, service key, and network connection." }, { status: 503 });
   }
 }
